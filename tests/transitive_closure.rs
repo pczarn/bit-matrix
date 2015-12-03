@@ -1,10 +1,10 @@
 extern crate bit_matrix;
 
-use bit_matrix::FixedBitMatrix;
+use bit_matrix::BitMatrix;
 
 #[test]
 fn test_transitive_closure() {
-    let mut matrix = FixedBitMatrix::new(4, 4);
+    let mut matrix = BitMatrix::new(4, 4);
     let points = &[
         (0, 0),
         (0, 1),
@@ -21,7 +21,7 @@ fn test_transitive_closure() {
     }
     matrix.transitive_closure();
 
-    let mut expected_matrix = FixedBitMatrix::new(4, 4);
+    let mut expected_matrix = BitMatrix::new(4, 4);
     for i in 0..4 {
         for j in 0..4 {
             expected_matrix.set(i, j, true);
