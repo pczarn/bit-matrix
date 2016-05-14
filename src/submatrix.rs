@@ -33,6 +33,7 @@ impl<'a> BitSubMatrix<'a> {
     }
 
     /// Forms a BitSubMatrix from a pointer and dimensions.
+    #[inline]
     pub unsafe fn from_raw_parts(ptr: *const Block, rows: usize, row_bits: usize) -> Self {
         BitSubMatrix {
             slice: slice::from_raw_parts(ptr, round_up_to_next(row_bits, BITS) / BITS * rows),
@@ -61,6 +62,7 @@ impl<'a> BitSubMatrixMut<'a> {
     }
 
     /// Forms a BitSubMatrix from a pointer and dimensions.
+    #[inline]
     pub unsafe fn from_raw_parts(ptr: *mut Block, rows: usize, row_bits: usize) -> Self {
         BitSubMatrixMut {
             slice: slice::from_raw_parts_mut(ptr, round_up_to_next(row_bits, BITS) / BITS * rows),
