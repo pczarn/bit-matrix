@@ -1,19 +1,16 @@
 [package]
-
 name = "bit-matrix"
-version = "0.1.0"
+version = "0.2.0"
 
 authors = [ "Piotr Czarnecki <pioczarn@gmail.com>" ]
 description = "Library for bit matrices and vectors."
 keywords = ["container", "bit", "bitfield", "algebra"]
-documentation = "http://pczarn.github.io/bit-matrix/bit-matrix/index.html"
-homepage = "http://pczarn.github.io/bit-matrix"
+documentation = "http://pczarn.github.io/cfg/bit-matrix/index.html"
 repository = "https://github.com/pczarn/bit-matrix"
-license = "MIT"
+license = "MIT/Apache-2.0"
 
 [lib]
 name = "bit_matrix"
-crate_type = ["dylib", "rlib"]
 
 [dependencies]
 bit-vec = "0.4"
