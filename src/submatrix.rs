@@ -72,7 +72,11 @@ impl<'a> BitSubMatrixMut<'a> {
     #[inline]
     fn num_rows(&self) -> usize {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
-        self.slice.len() / row_size
+        if row_size == 0 {
+            0
+        } else {
+            self.slice.len() / row_size
+        }
     }
 
     /// Sets the value of a bit.
