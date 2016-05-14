@@ -1,3 +1,5 @@
+//! Implements access to a matrix's individual rows.
+
 use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::ops::Index;
@@ -12,6 +14,7 @@ pub struct BitVecSlice {
 }
 
 impl BitVecSlice {
+    /// Creates a new slice from a slice of blocks.
     #[inline]
     pub fn new(slice: &[Block]) -> &Self {
         unsafe {
@@ -23,6 +26,16 @@ impl BitVecSlice {
     #[inline]
     pub fn iter_bits(&self, len: usize) -> Iter {
         Iter { bit_slice: self, range: 0..len }
+    }
+
+    /// Returns `true` if a bit is enabled in the bit vector slice, or `false` otherwise.
+    #[inline]
+    pub fn get(&self, bit: usize) -> bool {
+        let (block, i) = div_rem(bit, BITS);
+        match self.slice.get(block) {
+            None => false,
+            Some(b) => (b & (1 << i)) != 0,
+        }
     }
 }
 

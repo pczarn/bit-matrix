@@ -12,7 +12,7 @@
 extern crate bit_vec;
 
 pub mod matrix;
-mod row;
+pub mod row;
 pub mod submatrix;
 mod util;
 
