@@ -80,7 +80,7 @@ impl BitMatrix {
     pub fn split_at(&self, row: usize)
                     -> (BitSubMatrix,
                         &BitVecSlice,
-                        BitSubMatrixMut) {
+                        BitSubMatrix) {
         unsafe {
             (mem::transmute(self.sub_matrix(0 .. row)),
              mem::transmute(&self[row]),
