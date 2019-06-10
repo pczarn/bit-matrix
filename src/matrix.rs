@@ -1,8 +1,11 @@
 //! Matrix of bits.
 
-use std::mem;
-use std::ops::{Index, IndexMut};
-use std::ops::Range;
+use core::mem;
+use core::ops::{Index, IndexMut};
+use core::ops::Range;
+
+#[cfg(feature="serde")]
+use serde::{Serialize, Deserialize};
 
 use bit_vec::BitVec;
 
@@ -12,7 +15,8 @@ use util::round_up_to_next;
 use super::{BITS, TRUE, FALSE};
 
 /// A matrix of bits.
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature="serde", derive(Serialize, Deserialize))]
 pub struct BitMatrix {
     bit_vec: BitVec,
     row_bits: usize,

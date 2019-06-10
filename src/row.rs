@@ -1,9 +1,9 @@
 //! Implements access to a matrix's individual rows.
 
-use std::mem;
-use std::ops::{Deref, DerefMut};
-use std::ops::Index;
-use std::ops::Range;
+use core::mem;
+use core::ops::{Deref, DerefMut};
+use core::ops::Index;
+use core::ops::Range;
 
 use util::div_rem;
 use super::{Block, BITS, TRUE, FALSE};

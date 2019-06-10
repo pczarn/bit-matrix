@@ -9,7 +9,12 @@
 
 #![cfg_attr(test, deny(warnings))]
 
+#![no_std]
+
 extern crate bit_vec;
+
+#[cfg(feature="serde")]
+extern crate serde;
 
 pub mod matrix;
 pub mod row;

@@ -1,11 +1,11 @@
 //! Submatrix of bits.
 
-use std::slice;
-use std::fmt;
-use std::iter::Map;
-use std::mem;
-use std::ops::{Index, IndexMut};
-use std::ops::Range;
+use core::slice;
+use core::fmt;
+use core::iter::Map;
+use core::mem;
+use core::ops::{Index, IndexMut};
+use core::ops::Range;
 
 use super::{Block, BITS};
 use row::BitVecSlice;
