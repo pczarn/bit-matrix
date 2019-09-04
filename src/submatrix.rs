@@ -1,5 +1,6 @@
 //! Submatrix of bits.
 
+use core::cmp;
 use core::slice;
 use core::fmt;
 use core::iter::Map;
@@ -157,6 +158,13 @@ impl<'a> BitSubMatrixMut<'a> {
                     }
                 }
             }
+        }
+    }
+
+    /// Computes the reflexive closure of the binary relation represented by the matrix.
+    pub fn reflexive_closure(&mut self) {
+        for i in 0 .. cmp::min(self.row_bits, self.num_rows()) {
+            self.set(i, i, true);
         }
     }
 

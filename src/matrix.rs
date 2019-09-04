@@ -1,5 +1,6 @@
 //! Matrix of bits.
 
+use core::cmp;
 use core::mem;
 use core::ops::{Index, IndexMut};
 use core::ops::Range;
@@ -58,6 +59,16 @@ impl BitMatrix {
     pub fn set(&mut self, row: usize, col: usize, enabled: bool) {
         let row_size_in_bits = round_up_to_next(self.row_bits, BITS);
         self.bit_vec.set(row * row_size_in_bits + col, enabled);
+    }
+
+    /// Sets the value of all bits.
+    #[inline]
+    pub fn set_all(&mut self, enabled: bool) {
+        if enabled {
+            self.bit_vec.set_all();
+        } else {
+            self.bit_vec.clear();
+        }
     }
 
     /// Grows the matrix in-place, adding `num_rows` rows filled with `value`.
@@ -125,6 +136,13 @@ impl BitMatrix {
                     }
                 }
             }
+        }
+    }
+
+    /// Computes the reflexive closure of the binary relation represented by the matrix.
+    pub fn reflexive_closure(&mut self) {
+        for i in 0 .. cmp::min(self.row_bits, self.num_rows()) {
+            self.set(i, i, true);
         }
     }
 }
