@@ -76,6 +76,11 @@ impl BitMatrix {
         self.bit_vec.grow(round_up_to_next(self.row_bits, BITS) * num_rows, value);
     }
 
+    /// Truncates the matrix.
+    pub fn truncate(&mut self, num_rows: usize) {
+        self.bit_vec.truncate(round_up_to_next(self.row_bits, BITS) * num_rows);
+    }
+
     /// Returns a slice of the matrix's rows.
     #[inline]
     pub fn sub_matrix(&self, range: Range<usize>) -> BitSubMatrix {

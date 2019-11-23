@@ -22,6 +22,14 @@ impl BitVecSlice {
         }
     }
 
+    /// Creates a new slice from a mutable slice of blocks.
+    #[inline]
+    pub fn new_mut(slice: &mut [Block]) -> &mut Self {
+        unsafe {
+            mem::transmute(slice)
+        }
+    }
+
     /// Iterates over bits.
     #[inline]
     pub fn iter_bits(&self, len: usize) -> Iter {
