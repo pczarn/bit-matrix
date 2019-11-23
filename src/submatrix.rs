@@ -226,9 +226,9 @@ impl<'a> fmt::Debug for BitSubMatrix<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         for row in self.iter() {
             for bit in row.iter_bits(self.row_bits) {
-                try!(write!(fmt, "{}", if bit { 1 } else { 0 }));
+                write!(fmt, "{}", if bit { 1 } else { 0 })?;
             }
-            try!(write!(fmt, "\n"));
+            write!(fmt, "\n")?;
         }
         Ok(())
     }
