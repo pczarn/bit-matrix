@@ -1,7 +1,7 @@
 ## bit-matrix • ![Build status](https://api.travis-ci.org/pczarn/bit-matrix.png?branch=master) ![Latest version](https://img.shields.io/crates/v/bit-matrix.png)
 
 Rust library that implements bit matrices.
-[You can check the documentation here](http://pczarn.github.io/bit-matrix/).
+[You can check the documentation here](https://docs.rs/bit-matrix/latest/bit_matrix/).
 
 ## License
 
