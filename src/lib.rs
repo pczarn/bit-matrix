@@ -31,7 +31,7 @@ pub static FALSE: bool = false;
 
 pub(crate) mod local_prelude {
     pub use crate::block::{Block, BITS};
-    pub use crate::matrix::BitMatrix;
+    // pub use crate::matrix::BitMatrix;
     pub use crate::row::BitSlice;
     pub use crate::submatrix::{BitSubMatrix, BitSubMatrixMut};
 }

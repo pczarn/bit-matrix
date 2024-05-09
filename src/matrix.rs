@@ -1,7 +1,6 @@
 //! Matrix of bits.
 
 use core::cmp;
-use core::mem;
 use core::ops::Range;
 use core::ops::{Index, IndexMut};
 
@@ -113,12 +112,11 @@ impl BitMatrix {
     /// and a slice of all rows below.
     #[inline]
     pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut, BitSubMatrixMut) {
-        unsafe {
-            (
-                self.sub_matrix(0..row).into_mut(),
-                self.sub_matrix(row..self.num_rows()).into_mut(),
-            )
-        }
+        let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
+        let (first, second) = unsafe {
+            self.bit_vec.storage_mut().split_at_mut(row * row_size)
+        };
+        (BitSubMatrixMut::new(first, self.row_bits), BitSubMatrixMut::new(second, self.row_bits))
     }
 
     /// Iterate over bits in the specified row.
@@ -159,7 +157,7 @@ impl Index<usize> for BitMatrix {
     #[inline]
     fn index(&self, row: usize) -> &BitSlice {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
-        unsafe { mem::transmute(&self.bit_vec.storage()[row * row_size..(row + 1) * row_size]) }
+        BitSlice::new(&self.bit_vec.storage()[row * row_size..(row + 1) * row_size])
     }
 }
 
@@ -169,7 +167,7 @@ impl IndexMut<usize> for BitMatrix {
     fn index_mut(&mut self, row: usize) -> &mut BitSlice {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         unsafe {
-            mem::transmute(&mut self.bit_vec.storage_mut()[row * row_size..(row + 1) * row_size])
+            BitSlice::new_mut(&mut self.bit_vec.storage_mut()[row * row_size..(row + 1) * row_size])
         }
     }
 }

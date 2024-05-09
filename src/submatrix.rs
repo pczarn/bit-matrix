@@ -49,14 +49,6 @@ impl<'a> BitSubMatrix<'a> {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         self.slice.chunks(row_size).map(f)
     }
-
-    pub(crate) unsafe fn into_mut(self) -> BitSubMatrixMut<'a> {
-        let slice_ptr: *const _ = self.slice;
-        BitSubMatrixMut {
-            slice: &mut *(slice_ptr as *mut _),
-            row_bits: self.row_bits,
-        }
-    }
 }
 
 impl<'a> BitSubMatrixMut<'a> {
@@ -136,12 +128,9 @@ impl<'a> BitSubMatrixMut<'a> {
     /// and a slice of all rows below.
     #[inline]
     pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut, BitSubMatrixMut) {
-        unsafe {
-            (
-                self.sub_matrix(0..row).into_mut(),
-                self.sub_matrix(row..self.num_rows()).into_mut(),
-            )
-        }
+        let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
+        let (first, second) = self.slice.split_at_mut(row * row_size);
+        (BitSubMatrixMut::new(first, self.row_bits), BitSubMatrixMut::new(second, self.row_bits))
     }
 
     /// Computes the transitive closure of the binary relation represented by the matrix.
