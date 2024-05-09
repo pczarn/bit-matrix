@@ -1,21 +1,22 @@
 //! Implements bit matrices.
 
-#![deny(missing_docs,
-        missing_copy_implementations,
-        trivial_casts,
-        trivial_numeric_casts,
-        unused_import_braces,
-        unused_qualifications)]
-
+#![deny(
+    missing_docs,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_import_braces,
+    unused_qualifications
+)]
 #![cfg_attr(test, deny(warnings))]
-
 #![no_std]
 
 extern crate bit_vec;
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 extern crate serde;
 
+pub mod block;
 pub mod matrix;
 pub mod row;
 pub mod submatrix;
@@ -28,7 +29,9 @@ pub static TRUE: bool = true;
 /// A value for borrowing.
 pub static FALSE: bool = false;
 
-/// The number of bits in a block.
-pub const BITS: usize = 32;
-/// The type for storing bits.
-pub type Block = u32;
+pub(crate) mod local_prelude {
+    pub use crate::block::{Block, BITS};
+    pub use crate::matrix::BitMatrix;
+    pub use crate::row::BitSlice;
+    pub use crate::submatrix::{BitSubMatrix, BitSubMatrixMut};
+}

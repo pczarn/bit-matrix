@@ -1,10 +1,10 @@
 extern crate bit_matrix;
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 extern crate serde_json;
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 #[test]
 fn test_serialize_deserialize() {
     use bit_matrix::BitMatrix;
