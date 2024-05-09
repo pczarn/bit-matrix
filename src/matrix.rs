@@ -113,10 +113,11 @@ impl BitMatrix {
     #[inline]
     pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut, BitSubMatrixMut) {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
-        let (first, second) = unsafe {
-            self.bit_vec.storage_mut().split_at_mut(row * row_size)
-        };
-        (BitSubMatrixMut::new(first, self.row_bits), BitSubMatrixMut::new(second, self.row_bits))
+        let (first, second) = unsafe { self.bit_vec.storage_mut().split_at_mut(row * row_size) };
+        (
+            BitSubMatrixMut::new(first, self.row_bits),
+            BitSubMatrixMut::new(second, self.row_bits),
+        )
     }
 
     /// Iterate over bits in the specified row.

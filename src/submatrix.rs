@@ -130,7 +130,10 @@ impl<'a> BitSubMatrixMut<'a> {
     pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut, BitSubMatrixMut) {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         let (first, second) = self.slice.split_at_mut(row * row_size);
-        (BitSubMatrixMut::new(first, self.row_bits), BitSubMatrixMut::new(second, self.row_bits))
+        (
+            BitSubMatrixMut::new(first, self.row_bits),
+            BitSubMatrixMut::new(second, self.row_bits),
+        )
     }
 
     /// Computes the transitive closure of the binary relation represented by the matrix.
