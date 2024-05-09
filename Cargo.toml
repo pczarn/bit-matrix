@@ -1,6 +1,6 @@
 [package]
 name = "bit-matrix"
-version = "0.6.1"
+version = "0.7.0"
 
 authors = [ "Piotr Czarnecki <pioczarn@gmail.com>" ]
 description = "Library for bit matrices and vectors."
