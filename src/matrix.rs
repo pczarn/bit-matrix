@@ -6,6 +6,8 @@ use core::ops::{Index, IndexMut};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+#[cfg(all(feature = "miniserde", not(feature = "serde")))]
+use miniserde::{Deserialize, Serialize};
 
 #[cfg(feature = "memusage")]
 use memusage::MemoryReport;
@@ -19,7 +21,7 @@ use crate::util::round_up_to_next;
 
 /// A matrix of bits.
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 pub struct BitMatrix {
     bit_vec: BitVec,
     row_bits: usize,
