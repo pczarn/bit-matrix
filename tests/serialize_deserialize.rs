@@ -1,10 +1,10 @@
 extern crate bit_matrix;
+#[cfg(feature = "miniserde")]
+extern crate miniserde;
 #[cfg(feature = "serde")]
 extern crate serde;
 #[cfg(feature = "serde")]
 extern crate serde_json;
-#[cfg(feature = "miniserde")]
-extern crate miniserde;
 
 #[cfg(feature = "serde")]
 #[test]
@@ -31,9 +31,7 @@ fn test_serialize_deserialize() {
     let matrix: BitMatrix = serde_json::from_str(serialized.as_str()).unwrap();
 
     assert_eq!(matrix, expected_matrix);
-
 }
-
 
 #[cfg(feature = "miniserde")]
 #[test]
