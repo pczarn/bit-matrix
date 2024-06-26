@@ -4,9 +4,9 @@ use core::cmp;
 use core::ops::Range;
 use core::ops::{Index, IndexMut};
 
-#[cfg(all(feature = "miniserde", not(feature = "serialize")))]
+#[cfg(all(feature = "miniserde", not(feature = "serde")))]
 use miniserde::{Deserialize, Serialize};
-#[cfg(feature = "serialize")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "memusage")]
@@ -21,7 +21,10 @@ use crate::util::round_up_to_next;
 
 /// A matrix of bits.
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(any(feature = "serialize", feature = "miniserde"), derive(Serialize, Deserialize))]
+#[cfg_attr(
+    any(feature = "serde", feature = "miniserde"),
+    derive(Serialize, Deserialize)
+)]
 pub struct BitMatrix {
     bit_vec: BitVec,
     row_bits: usize,
