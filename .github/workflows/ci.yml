@@ -1,64 +1,48 @@
-name: CI
+name: Rust
 
 on:
   push:
+    branches: [ master ]
   pull_request:
-  schedule: [cron: "40 1 * * *"]
-
-permissions:
-  contents: read
+    branches: [ master ]
 
 env:
-  RUSTFLAGS: -Dwarnings
+  CARGO_TERM_COLOR: always
 
-jobs:
-  test:
-    name: Test suite
+jobs: 
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@nightly
-      - run: cargo test
+    - uses: actions/checkout@v4
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+    - name: Run miniserde tests
+      run: cargo test --features miniserde --verbose
 
-  windows:
-    name: Test suite (windows)
-    runs-on: windows-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@nightly
-      - run: cargo test
-
-  stable:
-    name: Rust ${{matrix.rust}}
+  miri:
+    name: "Miri"
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        rust: [stable, beta]
-    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Install Miri
+        run: |
+          rustup toolchain install nightly --component miri
+          rustup override set nightly
+          cargo miri setup
+      - name: Test with Miri
+        run: MIRIFLAGS=-Zmiri-strict-provenance cargo miri test
+  
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{matrix.rust}}
-      - run: cargo test
-      - run: cargo test --features serde
-      - run: cargo test --features miniserde
-
-  nightly:
-    name: Rust nightly ${{matrix.os == 'windows' && '(windows)' || ''}}
-    runs-on: ${{matrix.os}}-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu, windows]
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@nightly
-      - run: cargo build
+          toolchain: stable
+          components: rustfmt
+      - run: cargo fmt --all -- --check
 
   msrv:
     name: Rust ${{matrix.rust}}
@@ -66,38 +50,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.65.0, 1.66.0, 1.67.0]
+        rust: [1.67.0, 1.68.0]
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
+      - run: cargo build
       - run: cargo test
       - run: cargo test --features serde
       - run: cargo test --features miniserde
-      - run: cargo build
-  # clippy:
-  #   name: Clippy
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 45
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: dtolnay/rust-toolchain@clippy
-  #     - run: cargo clippy --features generation -- -Dclippy::all -Dclippy::pedantic
 
-  fmt:
-    name: rustfmt-check
+  docs:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    timeout-minutes: 45
+    env:
+      RUSTDOCFLAGS: -Dwarnings
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
         with:
-            toolchain: nightly
-            components: rustfmt
-            override: true
-      - uses: LoliGothick/rustfmt-check@master
-        with:
-            token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: stable
+      - uses: swatinem/rust-cache@v2
+      - run: cargo doc --workspace --no-deps

@@ -1,16 +1,7 @@
 //! Matrix of bits.
 
 use core::cmp;
-use core::ops::Range;
-use core::ops::{Index, IndexMut};
-
-#[cfg(all(feature = "miniserde", not(feature = "serde")))]
-use miniserde::{Deserialize, Serialize};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "memusage")]
-use memusage::MemoryReport;
+use core::ops::{Index, IndexMut, RangeBounds};
 
 use bit_vec::BitVec;
 
@@ -22,9 +13,10 @@ use crate::util::round_up_to_next;
 /// A matrix of bits.
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(
-    any(feature = "serde", feature = "miniserde"),
-    derive(Serialize, Deserialize)
+    feature = "miniserde",
+    derive(miniserde::Serialize, miniserde::Deserialize)
 )]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BitMatrix {
     bit_vec: BitVec,
     row_bits: usize,
@@ -92,12 +84,15 @@ impl BitMatrix {
 
     /// Returns a slice of the matrix's rows.
     #[inline]
-    pub fn sub_matrix(&self, range: Range<usize>) -> BitSubMatrix {
+    pub fn sub_matrix<R: RangeBounds<usize>>(&self, range: R) -> BitSubMatrix {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
-        BitSubMatrix::new(
-            &self.bit_vec.storage()[range.start * row_size..range.end * row_size],
-            self.row_bits,
-        )
+        BitSubMatrix {
+            slice: &self.bit_vec.storage()[(
+                range.start_bound().map(|&s| s * row_size),
+                range.end_bound().map(|&e| e * row_size),
+            )],
+            row_bits: self.row_bits,
+        }
     }
 
     /// Given a row's index, returns a slice of all rows above that row, a reference to said row,

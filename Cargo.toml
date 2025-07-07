@@ -1,6 +1,6 @@
 [package]
 name = "bit-matrix"
-version = "0.8.1"
+version = "0.8.2"
 
 authors = [ "Piotr Czarnecki <pioczarn@gmail.com>" ]
 description = "Library for bit matrices and vectors."
@@ -9,6 +9,7 @@ documentation = "https://docs.rs/bit-matrix/latest/bit_matrix/"
 repository = "https://github.com/pczarn/bit-matrix"
 license = "MIT/Apache-2.0"
 edition = "2021"
+rust-version = "1.77"
 
 [lib]
 name = "bit_matrix"
