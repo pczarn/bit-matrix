@@ -1,5 +1,3 @@
-extern crate bit_matrix;
-
 use bit_matrix::BitMatrix;
 
 #[test]

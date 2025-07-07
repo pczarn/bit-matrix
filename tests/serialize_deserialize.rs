@@ -1,14 +1,6 @@
-extern crate bit_matrix;
-#[cfg(feature = "miniserde")]
-extern crate miniserde;
-#[cfg(feature = "serde")]
-extern crate serde;
-#[cfg(feature = "serde")]
-extern crate serde_json;
-
 #[cfg(feature = "serde")]
 #[test]
-fn test_serialize_deserialize() {
+fn test_serialize_deserialize_serde() {
     use bit_matrix::BitMatrix;
 
     let mut expected_matrix = BitMatrix::new(4, 4);
@@ -35,7 +27,7 @@ fn test_serialize_deserialize() {
 
 #[cfg(feature = "miniserde")]
 #[test]
-fn test_serialize_deserialize() {
+fn test_serialize_deserialize_miniserde() {
     use bit_matrix::BitMatrix;
 
     let mut expected_matrix = BitMatrix::new(4, 4);

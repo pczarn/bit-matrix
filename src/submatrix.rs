@@ -2,9 +2,8 @@
 
 use core::cmp;
 use core::fmt;
-use core::iter::Map;
 use core::mem;
-use core::ops::Range;
+use core::ops::RangeBounds;
 use core::ops::{Index, IndexMut};
 use core::slice;
 
@@ -13,14 +12,14 @@ use crate::util::{div_rem, round_up_to_next};
 
 /// Immutable access to a range of matrix's rows.
 pub struct BitSubMatrix<'a> {
-    slice: &'a [Block],
-    row_bits: usize,
+    pub(crate) slice: &'a [Block],
+    pub(crate) row_bits: usize,
 }
 
 /// Mutable access to a range of matrix's rows.
 pub struct BitSubMatrixMut<'a> {
-    slice: &'a mut [Block],
-    row_bits: usize,
+    pub(crate) slice: &'a mut [Block],
+    pub(crate) row_bits: usize,
 }
 
 impl<'a> BitSubMatrix<'a> {
@@ -42,7 +41,7 @@ impl<'a> BitSubMatrix<'a> {
     }
 
     /// Iterates over the matrix's rows in the form of mutable slices.
-    pub fn iter(&self) -> Map<slice::Chunks<Block>, fn(&[Block]) -> &BitSlice> {
+    pub fn iter(&self) -> impl Iterator<Item = &BitSlice> {
         fn f(arg: &[Block]) -> &BitSlice {
             unsafe { mem::transmute(arg) }
         }
@@ -102,11 +101,13 @@ impl<'a> BitSubMatrixMut<'a> {
     }
 
     /// Returns a slice of the matrix's rows.
-    #[inline]
-    pub fn sub_matrix(&self, range: Range<usize>) -> BitSubMatrix {
+    pub fn sub_matrix<R: RangeBounds<usize>>(&self, range: R) -> BitSubMatrix {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         BitSubMatrix {
-            slice: &self.slice[range.start * row_size..range.end * row_size],
+            slice: &self.slice[(
+                range.start_bound().map(|&s| s * row_size),
+                range.end_bound().map(|&e| e * row_size),
+            )],
             row_bits: self.row_bits,
         }
     }
@@ -162,7 +163,7 @@ impl<'a> BitSubMatrixMut<'a> {
     }
 
     /// Iterates over the matrix's rows in the form of mutable slices.
-    pub fn iter_mut(&mut self) -> Map<slice::ChunksMut<Block>, fn(&mut [Block]) -> &mut BitSlice> {
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut BitSlice> {
         fn f(arg: &mut [Block]) -> &mut BitSlice {
             unsafe { mem::transmute(arg) }
         }
