@@ -28,7 +28,7 @@ impl BitSlice {
 
     /// Iterates over bits.
     #[inline]
-    pub fn iter_bits(&self, len: usize) -> Iter {
+    pub fn iter_bits(&self, len: usize) -> impl Iterator<Item = bool> + '_ {
         Iter {
             bit_slice: self,
             range: 0..len,

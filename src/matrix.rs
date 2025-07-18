@@ -7,7 +7,6 @@ use bit_vec::BitVec;
 
 use super::{FALSE, TRUE};
 use crate::local_prelude::*;
-use crate::row::Iter;
 use crate::util::round_up_to_next;
 
 /// A matrix of bits.
@@ -84,7 +83,7 @@ impl BitMatrix {
 
     /// Returns a slice of the matrix's rows.
     #[inline]
-    pub fn sub_matrix<R: RangeBounds<usize>>(&self, range: R) -> BitSubMatrix {
+    pub fn sub_matrix<R: RangeBounds<usize>>(&self, range: R) -> BitSubMatrix<'_> {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         BitSubMatrix {
             slice: &self.bit_vec.storage()[(
@@ -101,7 +100,7 @@ impl BitMatrix {
     /// Functionally equivalent to `(self.sub_matrix(0..row), &self[row],
     /// self.sub_matrix(row..self.num_rows()))`.
     #[inline]
-    pub fn split_at(&self, row: usize) -> (BitSubMatrix, BitSubMatrix) {
+    pub fn split_at(&self, row: usize) -> (BitSubMatrix<'_>, BitSubMatrix<'_>) {
         (
             self.sub_matrix(0..row),
             self.sub_matrix(row..self.num_rows()),
@@ -111,7 +110,7 @@ impl BitMatrix {
     /// Given a row's index, returns a slice of all rows above that row, a reference to said row,
     /// and a slice of all rows below.
     #[inline]
-    pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut, BitSubMatrixMut) {
+    pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut<'_>, BitSubMatrixMut<'_>) {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         let (first, second) = unsafe { self.bit_vec.storage_mut().split_at_mut(row * row_size) };
         (
@@ -121,7 +120,7 @@ impl BitMatrix {
     }
 
     /// Iterate over bits in the specified row.
-    pub fn iter_row(&self, row: usize) -> Iter {
+    pub fn iter_row(&self, row: usize) -> impl Iterator<Item = bool> + '_ {
         BitSlice::new(&self[row].slice).iter_bits(self.row_bits)
     }
 
@@ -185,13 +184,6 @@ impl Index<(usize, usize)> for BitMatrix {
         } else {
             &FALSE
         }
-    }
-}
-
-#[cfg(feature = "memusage")]
-impl MemoryReport for BitMatrix {
-    fn indirect(&self) -> usize {
-        (self.bit_vec.capacity() + 31) / 32 * 4
     }
 }
 

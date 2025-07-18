@@ -24,7 +24,7 @@ pub struct BitSubMatrixMut<'a> {
 
 impl<'a> BitSubMatrix<'a> {
     /// Returns a new BitSubMatrix.
-    pub fn new(slice: &[Block], row_bits: usize) -> BitSubMatrix {
+    pub fn new(slice: &[Block], row_bits: usize) -> BitSubMatrix<'_> {
         BitSubMatrix {
             slice: slice,
             row_bits: row_bits,
@@ -52,7 +52,7 @@ impl<'a> BitSubMatrix<'a> {
 
 impl<'a> BitSubMatrixMut<'a> {
     /// Returns a new BitSubMatrixMut.
-    pub fn new(slice: &mut [Block], row_bits: usize) -> BitSubMatrixMut {
+    pub fn new(slice: &mut [Block], row_bits: usize) -> BitSubMatrixMut<'_> {
         BitSubMatrixMut {
             slice: slice,
             row_bits: row_bits,
@@ -101,7 +101,7 @@ impl<'a> BitSubMatrixMut<'a> {
     }
 
     /// Returns a slice of the matrix's rows.
-    pub fn sub_matrix<R: RangeBounds<usize>>(&self, range: R) -> BitSubMatrix {
+    pub fn sub_matrix<R: RangeBounds<usize>>(&self, range: R) -> BitSubMatrix<'_> {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         BitSubMatrix {
             slice: &self.slice[(
@@ -118,7 +118,7 @@ impl<'a> BitSubMatrixMut<'a> {
     /// Functionally equivalent to `(self.sub_matrix(0..row), &self[row],
     /// self.sub_matrix(row..self.num_rows()))`.
     #[inline]
-    pub fn split_at(&self, row: usize) -> (BitSubMatrix, BitSubMatrix) {
+    pub fn split_at(&self, row: usize) -> (BitSubMatrix<'_>, BitSubMatrix<'_>) {
         (
             self.sub_matrix(0..row),
             self.sub_matrix(row..self.num_rows()),
@@ -128,7 +128,7 @@ impl<'a> BitSubMatrixMut<'a> {
     /// Given a row's index, returns a slice of all rows above that row, a reference to said row,
     /// and a slice of all rows below.
     #[inline]
-    pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut, BitSubMatrixMut) {
+    pub fn split_at_mut(&mut self, row: usize) -> (BitSubMatrixMut<'_>, BitSubMatrixMut<'_>) {
         let row_size = round_up_to_next(self.row_bits, BITS) / BITS;
         let (first, second) = self.slice.split_at_mut(row * row_size);
         (
