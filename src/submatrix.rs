@@ -32,6 +32,11 @@ impl<'a> BitSubMatrix<'a> {
     }
 
     /// Forms a BitSubMatrix from a pointer and dimensions.
+    /// 
+    /// # Safety
+    /// 
+    /// Can construct an ill-formed value, thus the function is marked as
+    /// unsafe.
     #[inline]
     pub unsafe fn from_raw_parts(ptr: *const Block, rows: usize, row_bits: usize) -> Self {
         BitSubMatrix {
@@ -40,7 +45,7 @@ impl<'a> BitSubMatrix<'a> {
         }
     }
 
-    /// Iterates over the matrix's rows in the form of mutable slices.
+    /// Iterates over the matrix's rows in the form of immutable slices.
     pub fn iter(&self) -> impl Iterator<Item = &BitSlice> {
         fn f(arg: &[Block]) -> &BitSlice {
             unsafe { mem::transmute(arg) }
@@ -51,7 +56,7 @@ impl<'a> BitSubMatrix<'a> {
 }
 
 impl<'a> BitSubMatrixMut<'a> {
-    /// Returns a new BitSubMatrixMut.
+    /// Returns a new `BitSubMatrixMut`.
     pub fn new(slice: &mut [Block], row_bits: usize) -> BitSubMatrixMut<'_> {
         BitSubMatrixMut {
             slice: slice,
@@ -59,7 +64,11 @@ impl<'a> BitSubMatrixMut<'a> {
         }
     }
 
-    /// Forms a BitSubMatrix from a pointer and dimensions.
+    /// Forms a `BitSubMatrix` from a pointer and dimensions.
+    /// 
+    /// # Safety
+    /// 
+    /// Can construct an ill-formed value, thus the function is unsafe.
     #[inline]
     pub unsafe fn from_raw_parts(ptr: *mut Block, rows: usize, row_bits: usize) -> Self {
         BitSubMatrixMut {
@@ -79,7 +88,13 @@ impl<'a> BitSubMatrixMut<'a> {
         }
     }
 
-    /// Sets the value of a bit.
+    /// Returns the number of columns.
+    #[inline]
+    pub fn num_cols(&self) -> usize {
+        self.row_bits
+    }
+
+    /// Sets the value of a bit. The first argument is the row number.
     ///
     /// # Panics
     ///
@@ -137,25 +152,51 @@ impl<'a> BitSubMatrixMut<'a> {
         )
     }
 
-    /// Computes the transitive closure of the binary relation represented by the matrix.
+    /// Computes the transitive closure of the binary relation
+    /// represented by this square bit matrix.
     ///
-    /// Uses the Warshall's algorithm.
+    /// Modifies this matrix in place using Warshall's algorithm.
+    /// 
+    /// After this operation, the matrix will describe a transitive
+    /// relation. This means that, for any indices `a`, `b`, `c`,
+    /// if `M[(a, b)]` and `M[(b, c)]`, then `M[(a, c)]`.
+    /// 
+    /// # Complexity
+    /// 
+    /// The time complexity is **O(n^3)**, where `n` is the number
+    /// of columns and rows.
+    /// 
+    /// # Panics
+    /// 
+    /// The matrix must be square for this operation to succeed.
     pub fn transitive_closure(&mut self) {
-        assert_eq!(self.num_rows(), self.row_bits);
+        assert!(self.is_square());
         for pos in 0..self.row_bits {
             let (mut rows0, mut rows1a) = self.split_at_mut(pos);
-            let (row, mut rows1b) = rows1a.split_at_mut(1);
-            for dst_row in rows0.iter_mut().chain(rows1b.iter_mut()) {
+            let (mut row, mut rows1b) = rows1a.split_at_mut(1);
+            for mut dst_row in rows0.iter_mut().chain(rows1b.iter_mut()) {
                 if dst_row[pos] {
-                    for (dst, src) in dst_row.iter_blocks_mut().zip(row[0].iter_blocks()) {
-                        *dst |= src;
-                    }
+                    dst_row |= &mut row[0];
                 }
             }
         }
     }
 
-    /// Computes the reflexive closure of the binary relation represented by the matrix.
+    /// Determines whether the number of rows equals the number of columns.
+    /// 
+    /// This means the matrix is square.
+    fn is_square(&self) -> bool {
+        self.num_rows() == self.row_bits
+    }
+
+    /// Computes the reflexive closure of the binary relation represented by
+    /// this bit matrix. The matrix can be rectangular.
+    /// 
+    /// The reflexive closure means that for every `x`` that will be within bounds,
+    /// `M[(x, x)]` is true.
+    ///
+    /// In other words, modifies this matrix in-place by making all
+    /// bits on the diagonal set.
     pub fn reflexive_closure(&mut self) {
         for i in 0..cmp::min(self.row_bits, self.num_rows()) {
             self.set(i, i, true);

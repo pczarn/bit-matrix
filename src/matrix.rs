@@ -1,4 +1,30 @@
 //! Matrix of bits.
+//! 
+//! # Examples
+//! 
+//! Gets a mutable reference to the square bit matrix within this
+//! rectangular matrix, then performs a transitive closure.
+//! 
+//! ```rust
+//! use bit_matrix::BitMatrix;
+//! 
+//! let mut matrix = BitMatrix::new(7, 5);
+//! matrix.set(1, 2, true);
+//! matrix.set(2, 3, true);
+//! matrix.set(3, 4, true);
+//! 
+//! {
+//!     let mut sub_matrix = matrix.sub_matrix_mut(1 .. 6);
+//!     sub_matrix.transitive_closure();
+//! }
+//! assert!(matrix[(1, 4)]);
+//! 
+//! matrix.reflexive_closure();
+//! assert!(matrix[(0, 0)]);
+//! assert!(matrix[(1, 1)]);
+//! assert!(matrix[(2, 2)]);
+//! assert!(matrix[(3, 3)]);
+//! ```
 
 use core::cmp;
 use core::ops::{Index, IndexMut, RangeBounds};
@@ -41,6 +67,12 @@ impl BitMatrix {
             let row_blocks = round_up_to_next(self.row_bits, BITS) / BITS;
             self.bit_vec.storage().len() / row_blocks
         }
+    }
+
+    /// Returns the number of columns.
+    #[inline]
+    pub fn num_cols(&self) -> usize {
+        self.row_bits
     }
 
     /// Returns the matrix's size as `(rows, columns)`.
@@ -94,6 +126,27 @@ impl BitMatrix {
         }
     }
 
+    /// Returns a slice of the matrix's rows.
+    #[inline]
+    pub fn sub_matrix_mut<R: RangeBounds<usize>>(&mut self, range: R) -> BitSubMatrixMut<'_> {
+        let row_size = self.row_size();
+        // Safety:
+        // 
+        unsafe {
+            BitSubMatrixMut {
+                slice: &mut self.bit_vec.storage_mut()[(
+                    range.start_bound().map(|&s| s * row_size),
+                    range.end_bound().map(|&e| e * row_size),
+                )],
+                row_bits: self.row_bits,
+            }
+        }
+    }
+
+    fn row_size(&self) -> usize {
+        round_up_to_next(self.row_bits, BITS) / BITS
+    }
+
     /// Given a row's index, returns a slice of all rows above that row, a reference to said row,
     /// and a slice of all rows below.
     ///
@@ -124,25 +177,47 @@ impl BitMatrix {
         BitSlice::new(&self[row].slice).iter_bits(self.row_bits)
     }
 
-    /// Computes the transitive closure of the binary relation represented by the matrix.
+    /// Computes the transitive closure of the binary relation
+    /// represented by this square bit matrix.
     ///
-    /// Uses the Warshall's algorithm.
+    /// Modifies this matrix in place using Warshall's algorithm.
+    /// 
+    /// After this operation, the matrix will describe a transitive
+    /// relation. This means that, for any indices `a`, `b`, `c`,
+    /// if `M[(a, b)]` and `M[(b, c)]`, then `M[(a, c)]`.
+    /// 
+    /// # Complexity
+    /// 
+    /// The time complexity is **O(n^3)**, where `n` is the number
+    /// of columns and rows.
+    /// 
+    /// # Panics
+    /// 
+    /// The matrix must be square for this operation to succeed.
     pub fn transitive_closure(&mut self) {
-        assert_eq!(self.num_rows(), self.row_bits);
-        for pos in 0..self.row_bits {
-            let (mut rows0, mut rows1a) = self.split_at_mut(pos);
-            let (row, mut rows1b) = rows1a.split_at_mut(1);
-            for dst_row in rows0.iter_mut().chain(rows1b.iter_mut()) {
-                if dst_row[pos] {
-                    for (dst, src) in dst_row.iter_blocks_mut().zip(row[0].iter_blocks()) {
-                        *dst |= *src;
-                    }
-                }
-            }
-        }
+        Into::<BitSubMatrixMut>::into(self).transitive_closure();
     }
 
-    /// Computes the reflexive closure of the binary relation represented by the matrix.
+    /// Determines whether the number of rows equals the number of columns.
+    /// 
+    /// This means the matrix is square.
+    pub fn is_square(&self) -> bool {
+        self.num_rows() == self.row_bits
+    }
+
+    /// Determines whether the matrix is empty.
+    pub fn is_empty(&self) -> bool {
+        self.size() == (0, 0)
+    }
+
+    /// Computes the reflexive closure of the binary relation represented by
+    /// this bit matrix. The matrix can be rectangular.
+    /// 
+    /// The reflexive closure means that for every `x`` that will be within bounds,
+    /// `M[(x, x)]` is true.
+    ///
+    /// In other words, modifies this matrix in-place by making all
+    /// bits on the diagonal set.
     pub fn reflexive_closure(&mut self) {
         for i in 0..cmp::min(self.row_bits, self.num_rows()) {
             self.set(i, i, true);
@@ -150,7 +225,7 @@ impl BitMatrix {
     }
 }
 
-/// Returns the matrix's row in the form of an immutable slice.
+/// Gains immutable access to the matrix's row in the form of a `BitSlice`.
 impl Index<usize> for BitMatrix {
     type Output = BitSlice;
 
@@ -161,7 +236,7 @@ impl Index<usize> for BitMatrix {
     }
 }
 
-/// Returns the matrix's row in the form of a mutable slice.
+/// Gains mutable access to the matrix's row in the form of a `BitSlice`.
 impl IndexMut<usize> for BitMatrix {
     #[inline]
     fn index_mut(&mut self, row: usize) -> &mut BitSlice {
@@ -173,6 +248,9 @@ impl IndexMut<usize> for BitMatrix {
 }
 
 /// Returns `true` if a bit is enabled in the matrix, or `false` otherwise.
+/// 
+/// The first index in the tuple is row number, and the second is column
+/// number.
 impl Index<(usize, usize)> for BitMatrix {
     type Output = bool;
 
@@ -187,6 +265,14 @@ impl Index<(usize, usize)> for BitMatrix {
     }
 }
 
+impl<'a> From<&'a mut BitMatrix> for BitSubMatrixMut<'a> {
+    fn from(value: &'a mut BitMatrix) -> Self {
+        unsafe {
+            BitSubMatrixMut::new(value.bit_vec.storage_mut(), value.row_bits)
+        }
+    }
+}
+
 // Tests
 
 #[test]
@@ -195,6 +281,8 @@ fn test_empty() {
     for _ in 0..3 {
         assert_eq!(matrix.num_rows(), 0);
         assert_eq!(matrix.size(), (0, 0));
+        assert!(matrix.is_square());
+        assert!(matrix.is_empty());
         matrix.transitive_closure();
     }
 }

@@ -1,8 +1,6 @@
 //! Implements access to a matrix's individual rows.
 
-use core::mem;
-use core::ops::Index;
-use core::ops::Range;
+use core::{mem, ops};
 
 use super::{FALSE, TRUE};
 use crate::local_prelude::*;
@@ -29,10 +27,7 @@ impl BitSlice {
     /// Iterates over bits.
     #[inline]
     pub fn iter_bits(&self, len: usize) -> impl Iterator<Item = bool> + '_ {
-        Iter {
-            bit_slice: self,
-            range: 0..len,
-        }
+        (0 .. len).map(|i| self[i])
     }
 
     /// Iterates over the slice's blocks.
@@ -69,8 +64,9 @@ impl BitSlice {
     }
 }
 
-/// Returns `true` if a bit is enabled in the bit vector slice, or `false` otherwise.
-impl Index<usize> for BitSlice {
+/// Returns `true` if a bit is enabled in the bit vector slice,
+/// or `false` otherwise.
+impl ops::Index<usize> for BitSlice {
     type Output = bool;
 
     #[inline]
@@ -89,22 +85,11 @@ impl Index<usize> for BitSlice {
     }
 }
 
-/// An iterator for `BitVecSlice`.
-#[derive(Clone)]
-pub struct Iter<'a> {
-    bit_slice: &'a BitSlice,
-    range: Range<usize>,
-}
-
-impl<'a> Iterator for Iter<'a> {
-    type Item = bool;
-
-    #[inline]
-    fn next(&mut self) -> Option<bool> {
-        self.range.next().map(|i| self.bit_slice[i])
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.range.size_hint()
+impl<'a> ops::BitOrAssign for &'a mut BitSlice {
+    fn bitor_assign(&mut self, rhs: Self) {
+        debug_assert_eq!(self.slice.len(), rhs.slice.len());
+        for (dst, src) in self.iter_blocks_mut().zip(rhs.iter_blocks()) {
+            *dst |= src;
+        }
     }
 }

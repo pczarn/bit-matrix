@@ -19,9 +19,9 @@ mod util;
 
 pub use matrix::BitMatrix;
 
-/// A value for borrowing.
+/// A value for borrowing through the `Index` trait.
 pub static TRUE: bool = true;
-/// A value for borrowing.
+/// A value for borrowing through the `Index` trait.
 pub static FALSE: bool = false;
 
 pub(crate) mod local_prelude {
