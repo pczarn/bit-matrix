@@ -32,9 +32,9 @@ impl<'a> BitSubMatrix<'a> {
     }
 
     /// Forms a BitSubMatrix from a pointer and dimensions.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Can construct an ill-formed value, thus the function is marked as
     /// unsafe.
     #[inline]
@@ -65,9 +65,9 @@ impl<'a> BitSubMatrixMut<'a> {
     }
 
     /// Forms a `BitSubMatrix` from a pointer and dimensions.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Can construct an ill-formed value, thus the function is unsafe.
     #[inline]
     pub unsafe fn from_raw_parts(ptr: *mut Block, rows: usize, row_bits: usize) -> Self {
@@ -156,18 +156,18 @@ impl<'a> BitSubMatrixMut<'a> {
     /// represented by this square bit matrix.
     ///
     /// Modifies this matrix in place using Warshall's algorithm.
-    /// 
+    ///
     /// After this operation, the matrix will describe a transitive
     /// relation. This means that, for any indices `a`, `b`, `c`,
     /// if `M[(a, b)]` and `M[(b, c)]`, then `M[(a, c)]`.
-    /// 
+    ///
     /// # Complexity
-    /// 
+    ///
     /// The time complexity is **O(n^3)**, where `n` is the number
     /// of columns and rows.
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// The matrix must be square for this operation to succeed.
     pub fn transitive_closure(&mut self) {
         assert!(self.is_square());
@@ -183,7 +183,7 @@ impl<'a> BitSubMatrixMut<'a> {
     }
 
     /// Determines whether the number of rows equals the number of columns.
-    /// 
+    ///
     /// This means the matrix is square.
     fn is_square(&self) -> bool {
         self.num_rows() == self.row_bits
@@ -191,7 +191,7 @@ impl<'a> BitSubMatrixMut<'a> {
 
     /// Computes the reflexive closure of the binary relation represented by
     /// this bit matrix. The matrix can be rectangular.
-    /// 
+    ///
     /// The reflexive closure means that for every `x`` that will be within bounds,
     /// `M[(x, x)]` is true.
     ///

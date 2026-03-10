@@ -8,7 +8,7 @@
 [![crates.io][crates.io shield]][crates.io link]
 [![Documentation][docs.rs badge]][docs.rs link]
 ![Rust CI][github ci badge]
-![MSRV][rustc 1.65+]
+![MSRV][rustc 1.82+]
 <br />
 <br />
 [![Dependency Status][deps.rs status]][deps.rs link]
@@ -19,18 +19,48 @@
 
 [crates.io shield]: https://img.shields.io/crates/v/bit-matrix?label=latest
 [crates.io link]: https://crates.io/crates/bit-matrix
-[docs.rs badge]: https://docs.rs/bit-matrix/badge.svg?version=0.8.1
-[docs.rs link]: https://docs.rs/bit-matrix/0.8.1/bit-matrix/
+[docs.rs badge]: https://docs.rs/bit-matrix/badge.svg?version=0.9.1
+[docs.rs link]: https://docs.rs/bit-matrix/0.9.1/bit-matrix/
 [github ci badge]: https://github.com/pczarn/bit-matrix/workflows/CI/badge.svg?branch=master
-[rustc 1.65+]: https://img.shields.io/badge/rustc-1.65%2B-blue.svg
-[deps.rs status]: https://deps.rs/crate/bit-matrix/0.8.1/status.svg
-[deps.rs link]: https://deps.rs/crate/bit-matrix/0.8.1
+[rustc 1.82+]: https://img.shields.io/badge/rustc-1.82%2B-blue.svg
+[deps.rs status]: https://deps.rs/crate/bit-matrix/0.9.1/status.svg
+[deps.rs link]: https://deps.rs/crate/bit-matrix/0.9.1
 [shields.io download count]: https://img.shields.io/crates/d/bit-matrix.svg
 
 Rust library that implements bit matrices.
 [You can check the documentation here](https://docs.rs/bit-matrix/latest/bit_matrix/).
 
 Built on top of [contain-rs/bit-vec](https://github.com/contain-rs/bit-vec/).
+
+
+## Usage
+
+Add this to your Cargo.toml:
+
+```toml
+[dependencies]
+bit-matrix = "0.9"
+```
+
+If you want [serde](https://github.com/serde-rs/serde) support, include the feature like this:
+
+```toml
+[dependencies]
+bit-matrix = { version = "0.9", features = ["serde"] }
+```
+
+If you want to use bit-matrix in a program that has `#![no_std]`, just drop default features:
+
+```toml
+[dependencies]
+bit-matrix = { version = "0.9", default-features = false }
+```
+
+If you want to use serde with the alloc crate instead of std, just use the `serde_no_std` feature:
+
+```toml
+[dependencies]
+bit-matrix = { version = "0.9", default-features = false, features = ["serde", "serde_no_std"] }
 
 ## Examples
 
